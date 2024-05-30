@@ -1,7 +1,20 @@
 const puppeteer = require("puppeteer");
+require("dotenv").config();
 
 const scrapeLogic = async (res) => {
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({
+    headless: false,
+    executablePath:
+      process.env.NODE_ENV === "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : puppeteer.executablePath(),
+    args: [
+      "--disable-setuid-sandbox",
+      "--no-sandbox",
+      "--single-process",
+      "--no-zygote",
+    ],
+  });
 
   try {
     const page = await browser.newPage();
