@@ -1,6 +1,28 @@
 const puppeteer = require("puppeteer");
 require("dotenv").config();
 
+async function hughesLogin(username, password, page) {
+  const loginUrl = "https://hughesstatesville.com/login";
+  console.log("URL");
+
+  try {
+    await page.goto(loginUrl);
+    console.log("Hit URL");
+    await page.waitForSelector('input[name="D1"]');
+    console.log("wait URL");
+    await page.type('input[name="D1"]', username);
+    await page.type('input[name="D2"]', password);
+    await page.click('button[type="submit"]');
+    console.log("submit");
+
+    await page.waitForNavigation();
+    console.log("Login successful");
+  } catch (error) {
+    console.error("Error logging in: ", error);
+    throw error;
+  }
+}
+
 const scrapeLogic = async (res) => {
   const browser = await puppeteer.launch({
     executablePath:
@@ -18,29 +40,10 @@ const scrapeLogic = async (res) => {
   try {
     const page = await browser.newPage();
 
-    // Navigate the page to a URL
-    await page.goto("https://developer.chrome.com/");
+    const username = process.env.HugheshUserName || "mlcole@griffinbros.com";
+    const password = process.env.HughesPassword || "Picc1701!";
 
-    // Set screen size
-    await page.setViewport({ width: 1080, height: 1024 });
-
-    // Type into search box
-    await page.type(".devsite-search-field", "automate beyond recorder");
-
-    // Wait and click on first result
-    const searchResultSelector = ".devsite-result-item-link";
-    await page.waitForSelector(searchResultSelector);
-    await page.click(searchResultSelector);
-
-    // Locate the full title with a unique string
-    const textSelector = await page.waitForSelector(
-      "text/Customize and automate"
-    );
-    const fullTitle = await textSelector?.evaluate((el) => el.textContent);
-
-    // Print the full title
-    console.log('The title of this blog post is "%s".', fullTitle);
-    res.send(fullTitle);
+    await hughesLogin(username, password, page);
   } catch (error) {
     console.log("Error", error);
     res.send(`Something went wrong:- ${error} `);
